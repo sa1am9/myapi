@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 
 
-
 from account.models import Account
 from .serializers import RegistrationSerializer, AccountPropertiesSerializer, UserLoginSerializer
 
@@ -15,7 +14,7 @@ def validate_username(username):
         account = Account.objects.get(username=username)
     except Account.DoesNotExist:
         return None
-    if account != None:
+    if account is not None:
         return username
 
 
@@ -25,11 +24,11 @@ def registration_view(request):
     if request.method == 'POST':
         data = {}
         username = request.headers['username']
-        if validate_username(username) != None:
+        if validate_username(username) is not None:
             data['error_message'] = 'That username is already in use.'
             data['response'] = 'Error'
             return Response(data)
-        data = {'username' : username, 'password': request.headers['password']}
+        data = {'username': username, 'password': request.headers['password']}
         serializer = RegistrationSerializer(data=data)
         if serializer.is_valid():
             account = serializer.save()
@@ -44,14 +43,10 @@ def registration_view(request):
 
 @api_view(['GET', ])
 @permission_classes((AllowAny,))
-def all(request):
+def all_posts(request):
     posts = Account.objects.all()
     serializer = AccountPropertiesSerializer(posts, many=True)
     return Response(serializer.data)
-
-
-
-
 
 
 class UserLoginView(RetrieveAPIView):
@@ -62,14 +57,14 @@ class UserLoginView(RetrieveAPIView):
     def post(self, request):
 
         data = {'username': request.headers['username'],
-                                                 'password': request.headers['password']}
+                'password': request.headers['password']}
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         response = {
-            'success' : 'True',
-            'status code' : status.HTTP_200_OK,
+            'success': 'True',
+            'status code': status.HTTP_200_OK,
             'message': 'User logged in  successfully',
-            'token' : serializer.data['token'],
+            'token': serializer.data['token'],
             }
         status_code = status.HTTP_200_OK
 

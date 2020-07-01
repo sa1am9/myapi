@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import UserManager
 
+
 class Account(AbstractBaseUser):
 
     username = models.CharField(max_length=20, unique=True)

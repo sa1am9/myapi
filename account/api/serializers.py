@@ -1,9 +1,8 @@
-from django.contrib.auth import authenticate
+
 from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 from account.models import Account
-
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -24,8 +23,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         account = Account(username=self.validated_data['username'])
         password = self.validated_data['password']
         account.set_password(password)
+
         account.save()
         return account
+
 
 class AccountPropertiesSerializer(serializers.ModelSerializer):
 
@@ -34,9 +35,9 @@ class AccountPropertiesSerializer(serializers.ModelSerializer):
         fields = ['pk',  'username', ]
 
 
-
 JWT_PAYLOAD_HANDLER = api_settings.JWT_PAYLOAD_HANDLER
 JWT_ENCODE_HANDLER = api_settings.JWT_ENCODE_HANDLER
+
 
 class UserLoginSerializer(serializers.Serializer):
 

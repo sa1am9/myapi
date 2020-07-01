@@ -1,4 +1,3 @@
-from django.http import HttpResponse
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -6,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 from django.db.models import Count, Sum
+from django.http import HttpResponse
 
 from datetime import datetime as dt, timedelta as td
 
@@ -31,7 +31,6 @@ def post_collection(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 @api_view(['GET',])
 @permission_classes((AllowAny,))
 @authentication_classes((JSONWebTokenAuthentication,))
@@ -50,20 +49,18 @@ def post_element(request, pk):
 @permission_classes((IsAuthenticated,))
 @authentication_classes((JSONWebTokenAuthentication,))
 def like_post(request, pk):
-    import pdb
-    pdb.set_trace()
+    request.user.login_date = dt.now()
     try:
         post = Post.objects.get(pk=pk)
     except Post.DoesNotExist:
         return HttpResponse(status=404)
     if request.method == "PUT":
-        serializer = PostSerializer(post, data={"count_like":post.count_like+1, "author":post.author,
-                                          "text":post.text})
+        serializer = PostSerializer(post, data={"count_like": post.count_like+1, "author": post.author,
+                                                "text": post.text})
 
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-
 
 
 @api_view(["PUT", ])
@@ -75,19 +72,18 @@ def unlike_post(request, pk):
     except Post.DoesNotExist:
         return HttpResponse(status=404)
     if request.method == "PUT":
-        serializer = PostSerializer(post, data={"count_unlike":post.count_unlike+1, "author":post.author,
-                                          "text":post.text})
+        serializer = PostSerializer(post, data={"count_unlike": post.count_unlike+1, "author": post.author,
+                                                "text": post.text})
 
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
 
 
-
 @api_view(["GET", ])
 @permission_classes((AllowAny,))
 @authentication_classes((JSONWebTokenAuthentication,))
-def analitics(request):
+def analytics(request):
     if request.method == 'GET':
         start = request.query_params['date_from']
         end = request.query_params['date_to']
@@ -104,9 +100,8 @@ def analitics(request):
         step = td(days=1)
         while start < end:
             if start.strftime('%Y-%m-%d') not in result.keys():
-                result[start.strftime('%Y-%m-%d')]=0
+                result[start.strftime('%Y-%m-%d')] = 0
             start += step
-
 
         return Response(result)
 
