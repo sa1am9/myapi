@@ -43,9 +43,9 @@ def registration_view(request):
 
 @api_view(['GET', ])
 @permission_classes((AllowAny,))
-def all_posts(request):
-    posts = Account.objects.all()
-    serializer = AccountPropertiesSerializer(posts, many=True)
+def all_account(request):
+    account = Account.objects.all()
+    serializer = AccountPropertiesSerializer(account, many=True)
     return Response(serializer.data)
 
 
