@@ -1,13 +1,13 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.views import APIView
-from django.contrib.auth import authenticate
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+
 
 
 from account.models import Account
-from .serializers import RegistrationSerializer, AccountPropertiesSerializer
+from .serializers import RegistrationSerializer, AccountPropertiesSerializer, UserLoginSerializer
 
 
 def validate_username(username):
@@ -20,15 +20,16 @@ def validate_username(username):
 
 
 @api_view(['POST', ])
+@permission_classes((AllowAny,))
 def registration_view(request):
     if request.method == 'POST':
         data = {}
-        username = request.query_params['username']
+        username = request.headers['username']
         if validate_username(username) != None:
             data['error_message'] = 'That username is already in use.'
             data['response'] = 'Error'
             return Response(data)
-        data = {'username' : username, 'password': request.query_params['password']}
+        data = {'username' : username, 'password': request.headers['password']}
         serializer = RegistrationSerializer(data=data)
         if serializer.is_valid():
             account = serializer.save()
@@ -41,8 +42,8 @@ def registration_view(request):
         return Response(data)
 
 
-
 @api_view(['GET', ])
+@permission_classes((AllowAny,))
 def all(request):
     posts = Account.objects.all()
     serializer = AccountPropertiesSerializer(posts, many=True)
@@ -51,11 +52,6 @@ def all(request):
 
 
 
-from rest_framework import status
-from rest_framework.generics import RetrieveAPIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from .serializers import UserLoginSerializer
 
 
 class UserLoginView(RetrieveAPIView):
@@ -65,9 +61,8 @@ class UserLoginView(RetrieveAPIView):
 
     def post(self, request):
 
-        data = {'username': request.query_params['username'],
-                                                 'password': request.query_params['password']}
-
+        data = {'username': request.headers['username'],
+                                                 'password': request.headers['password']}
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         response = {

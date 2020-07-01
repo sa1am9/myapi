@@ -52,13 +52,13 @@ class UserLoginSerializer(serializers.Serializer):
 
         username = data['username']
         password = data['password']
-        users = Account.objects.all()
-        user = None
-        for i in users:
-
-            if i.username==username and i.check_password(password):
-                user = i
-        if user is None:
+        user = Account.objects.filter(username=username)
+        if not user.exists():
+            raise serializers.ValidationError(
+                'A user with this email and password is not found.'
+            )
+        user = user.first()
+        if not user.check_password(password):
             raise serializers.ValidationError(
                 'A user with this email and password is not found.'
             )
@@ -71,6 +71,6 @@ class UserLoginSerializer(serializers.Serializer):
                 'User with given email and password does not exists'
             )
         return {
-            'username':user.username,
+            'username': user.username,
             'token': jwt_token
         }
